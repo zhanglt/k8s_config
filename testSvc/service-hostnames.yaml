@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-clusterip-service             # 名称
+  labels:
+    name: test-clusterip-service
+spec:
+  type: ClusterIP                               # 开发端口的类型
+  selector:                                     # service负载的容器需要有同样的labels
+    app: hostnames
+  ports:
+  - port: 80                                    # 通过service来访问的端口
+    targetPort: 9376                          # 对应容器的端口

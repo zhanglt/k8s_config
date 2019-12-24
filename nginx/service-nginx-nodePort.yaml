@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-nodeport-service             # 名称
+  labels:
+    name: test-nodeport-service
+spec:
+  type: NodePort                               # 开发端口的类型
+  selector:                                     # service负载的容器需要有同样的labels
+    app: nginx
+  ports:
+  - port: 80                                    # 通过service来访问的端口
+    targetPort: 80                              # 对应容器的端口
+    nodePort: 30080                             # 对应需要放到宿主机IP上的端口
+

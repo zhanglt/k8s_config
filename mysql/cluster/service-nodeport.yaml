@@ -1,0 +1,19 @@
+---
+# Client service for connecting to any MySQL instance for reads.
+# For writes, you must instead connect to the master: mysql-0.mysql.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-nodeport
+  namespace: kube-database
+  labels:
+    app: mysql
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: 3306
+    nodePort: 33306
+  selector:
+    role: master 
+  type: NodePort

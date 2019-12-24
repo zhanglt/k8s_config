@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ceph-pod-nginx
+spec:
+  containers:
+  - name: ceph-nginx
+    image: nginx:1.7.9          
+    volumeMounts:
+    - name: ceph-nginx       
+      mountPath: /usr/local/share/nginx/html
+      readOnly: false
+  volumes:
+  - name: ceph-nginx         
+    persistentVolumeClaim:
+      claimName: myclaim

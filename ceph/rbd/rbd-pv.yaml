@@ -1,0 +1,26 @@
+#ceph osd pool create kube_mysql 64
+#rbd create ceph-image -s 1G --image-feature layering 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ceph-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "fast-rbd"
+  rbd:
+    monitors:
+      - 10.0.0.51:6789
+      - 10.0.0.52:6789
+      - 10.0.0.53:6789
+    pool: kube
+    image: ceph-image
+    user: kube
+    secretRef:
+      name: ceph-secret
+    fsType: xfs
+    readOnly: false
+  persistentVolumeReclaimPolicy: Recycle
+

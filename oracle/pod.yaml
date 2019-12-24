@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oracle-database
+  namespace: kube-database
+  labels:
+    app: oracle-database
+    version: 12.1.0.1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-database
+      version: 12.1.0.1
+  template:
+    metadata:
+      name: oracle-database
+      labels:
+        app: oracle-database
+        version: 12.1.0.1
+    spec:
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      - name: ora-pv-storage
+        persistentVolumeClaim:
+          claimName: oracle-pv-claim
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 54321   
+      # add your volume mount for your persistent storage here
+      containers:
+      - name: oarcle-database
+        command:
+        - /home/oracle/setup/dockerInit.sh
+        image: wangpengcheng/oracle12c-enterprise:12.2.0.1 
+        imagePullPolicy: IfNotPresent
+        #resources:
+        #  requests:
+        #    memory: 10Gi
+        ports:
+        - containerPort: 1521
+          hostPort: 1521
+        volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+          - mountPath: /ORCL
+            name: ora-pv-storage
+        # add your persistent storage for DB files here
+        env:
+          - name: DB_SID
+            value: OraDoc
+          - name: DB_PDB
+            value: OraPdb
+          - name: DB_PASSWD
+            value: passw0rd
+          #- name: DB_DOMAIN
+          #  value: my.domain.com
+          - name: DB_BUNDLE
+            value: basic
+          - name: DB_MEMORY
+            value: 8g
+      imagePullSecrets:
+      - name: regsecret
+

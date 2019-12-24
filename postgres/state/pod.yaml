@@ -1,0 +1,52 @@
+---
+
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+  namespace: kube-database
+  labels:
+    app: postgres
+spec:
+  serviceName: "postgres-service"
+  replicas: 1
+  selector:
+    matchLabels:
+       app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres-pod
+        image: postgres:9.6
+        ports:
+        - containerPort: 5432
+          name: postgres-port
+        volumeMounts:
+        - name: postgres-pv-claim
+          mountPath: /var/lib/postgresql/data/
+          subPath: postgres
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        - name: POSTGRES_PASSWORD
+          value: passw0rd
+        - name: POSTGRES_DB
+          value: testDB
+        - name: POSTGRES_USER
+          value: root
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-pv-claim
+      namespace: kube-database
+      labels:
+        app: postgres
+    spec:
+      storageClassName: fast-rbd  #存储类名，改为集群中已存在的
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
