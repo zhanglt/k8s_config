@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ceph-exporter
+  namespace: kube-monitor
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ceph-exporter
+    spec:
+      containers:
+        - name: ceph-exporter
+          image: digitalocean/ceph_exporter:2.0.6-luminous
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /etc/ceph
+            name: ceph-conf
+      volumes:
+      - hostPath:
+          path: /etc/ceph
+        name: ceph-conf
+

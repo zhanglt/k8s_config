@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubernetes.io/created-by: |
+      {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"DaemonSet","namespace":"monitoring","name":"ceph-exporter","uid":"3c5bf0d4-2fd9-11e7-8834-1866da6d9abb","apiVersion":"extensions","resourceVersion":"1336275"}}
+  labels:
+    app: ceph-exporter
+    pod-template-generation: "1"
+  name: ceph-exporter-1wfcd
+  namespace: monitoring
+  ownerReferences:
+  - apiVersion: extensions/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DaemonSet
+    name: ceph-exporter
+spec:
+  containers:
+  - image: digitalocean/ceph_exporter:2.0.6-luminous
+    imagePullPolicy: IfNotPresent
+    name: ceph-exporter
+    resources:
+      limits:
+        cpu: 100m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
+    volumeMounts:
+    - mountPath: /etc/ceph
+      name: ceph-conf
+  hostNetwork: true
+  nodeName: 19.202.136.211   #Ceph宿主机的ip
+  nodeSelector:
+    kubernetes.io/hostname: 19.202.136.211  #Ceph宿主机的ip
+  restartPolicy: Always
+  serviceAccount: default
+  serviceAccountName: default
+  volumes:
+  - hostPath:
+      path: /etc/ceph
+    name: ceph-conf

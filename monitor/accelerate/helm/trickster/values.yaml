@@ -1,0 +1,184 @@
+# Default values for trickster.
+
+## trickster container name
+##
+name: trickster
+
+## trickster container image
+##
+image:
+  repository: tricksterio/trickster
+  tag: 0.1.10
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+# - name: "image-pull-secret"
+
+config:
+  # Default trickster originURL, references a source Prometheus instance
+  # Ref: https://github.com/Comcast/trickster/blob/master/docs/configuring.md
+  originURL: http://10.98.235.173
+  cache:
+    type: memory
+    redis:
+      protocol: tcp
+      endpoint: redis:6379
+    filesystem:
+      mountPath: /tmp/trickster
+    boltdb:
+      file: trickster.db
+      bucket: trickster
+  # Put ints in quotes to ensure they aren't converted to scientific notations.
+  # See https://github.com/kubernetes/helm/issues/1707
+  recordTTLSecs: "21600"
+  defaultStep: "300"
+  # 24h
+  maxValueAgeSecs: "86400"
+  fastForwardDisable: false
+  logLevel: info
+
+## trickster priorityClassName
+##
+priorityClassName: ""
+
+## Additional trickster container arguments
+##
+extraArgs: {}
+
+## Additional trickster container environment variable
+## For instance to add a http_proxy
+##
+extraEnv: {}
+
+ingress:
+  ## If true, trickster Ingress will be created
+  ##
+  enabled: false
+
+  ## trickster Ingress annotations
+  ##
+  annotations: {}
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## trickster Ingress additional labels
+  ##
+  extraLabels: {}
+
+  ## trickster Ingress hostnames with optional path
+  ## Must be provided if Ingress is enabled
+  ##
+  hosts: []
+  #   - trickster.domain.com
+  #   - domain.com/trickster
+
+  ## trickster Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  ##
+  tls: []
+  #   - secretName: trickster-tls
+  #     hosts:
+  #       - trickster.domain.com
+
+## trickster Deployment Strategy type
+# strategy:
+#   type: Recreate
+
+## Node tolerations for trickster scheduling to nodes with taints
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+##
+tolerations: []
+  # - key: "key"
+  #   operator: "Equal|Exists"
+  #   value: "value"
+  #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+## Node labels for trickster pod assignment
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+
+## Pod affinity
+##
+affinity: {}
+
+## Use an alternate scheduler, e.g. "stork".
+## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+##
+# schedulerName:
+
+persistentVolume:
+  ## If true, trickster will create/use a Persistent Volume Claim
+  ## If false, use emptyDir
+  ##
+  enabled: true
+
+  ## trickster data Persistent Volume access modes
+  ## Must match those of existing PV or dynamic provisioner
+  ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  accessModes:
+    - ReadWriteOnce
+
+  ## trickster data Persistent Volume Claim annotations
+  ##
+  annotations: {}
+
+  ## trickster data Persistent Volume existing claim name
+  ## Requires trickster.persistentVolume.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  existingClaim: ""
+
+  ## trickster data Persistent Volume size
+  ##
+  size: 15Gi
+
+  ## trickster data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: fast-rbd
+
+## Annotations to be added to trickster pods
+##
+podAnnotations: {}
+
+## Use a StatefulSet if replicaCount needs to be greater than 1 (see below)
+##
+replicaCount: 1
+
+## trickster resource requests and limits
+## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources: {}
+  # limits:
+  #   cpu: 10m
+  #   memory: 32Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 32Mi
+
+## Security context to be added to trickster pods
+##
+securityContext: {}
+
+service:
+  annotations: {}
+  labels: {}
+  clusterIP: ""
+
+  ## List of IP addresses at which the trickster service is available
+  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+  ##
+  externalIPs: []
+
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  metricsPort: 8080
+  servicePort: 9090
+  # nodePort: 30000
+  # metricsNodePort: 30001
+  type: ClusterIP
