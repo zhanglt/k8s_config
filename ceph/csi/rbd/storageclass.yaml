@@ -2,7 +2,8 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-   name: csi-rbd-sc
+   #name: csi-rbd-sc
+   name: fast-rbd
 provisioner: rbd.csi.ceph.com
 parameters:
    # String representing a Ceph cluster to provision storage from.
@@ -12,7 +13,7 @@ parameters:
    # Ensure to create an entry in the config map named ceph-csi-config, based on
    # csi-config-map-sample.yaml, to accompany the string chosen to
    # represent the Ceph cluster in clusterID below
-   clusterID: 7eefd7e3-9b67-413d-81d6-1c6f35cd25c8
+   clusterID: e86cb5e3-fb14-4227-a38b-3070834b3f88
    # If you want to use erasure coded pool with RBD, you need to create
    # two pools. one erasure coded and one replicated.
    # You need to specify the replicated pool here in the `pool` parameter, it is
