@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: metallb-system
+spec:
+  tls:
+  - hosts:
+    - test.metallb.com
+    secretName: ingress-secret
+  rules:
+  - host: test.metallb.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-metallb
+          servicePort: 80
