@@ -630,13 +630,13 @@ server:
   global:
     ## How frequently to scrape targets by default
     ##
-    scrape_interval: 1m
+    scrape_interval: 15s
     ## How long until a scrape request times out
     ##
     scrape_timeout: 10s
     ## How frequently to evaluate rules
     ##
-    evaluation_interval: 1m
+    evaluation_interval: 15s
 
   ## Additional Prometheus server container arguments
   ##
@@ -821,7 +821,9 @@ server:
 
   ## Prometheus AlertManager configuration
   ##
-  alertmanagers: []
+  alertmanagers:
+  - static_configs:
+    - targets: ["10.97.127.4:80"]
 
   ## Specify if a Pod Security Policy for node-exporter must be created
   ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
@@ -1126,19 +1128,25 @@ pushgateway:
 ##
 alertmanagerFiles:
   alertmanager.yml:
-    global: {}
-      # slack_api_url: ''
+    global:
+      smtp_smarthost: 19.202.136.211:25
+      smtp_from: root@localhost
+      resolve_timeout: 5m
+      smtp_require_tls: false
 
+      # slack_api_url: ''
     receivers:
-      - name: default-receiver
+      - name: root
+        email_configs:
+          - to: root@localhost
         # slack_configs:
         #  - channel: '@you'
         #    send_resolved: true
-
     route:
+      group_by: ['alertname', 'cluster', 'service', 'Instances']
       group_wait: 10s
-      group_interval: 5m
-      receiver: default-receiver
+      group_interval: 1s
+      receiver: root@localhost
       repeat_interval: 3h
 
 ## Prometheus server ConfigMap entries
@@ -1147,18 +1155,22 @@ serverFiles:
 
   ## Alerts configuration
   ## Ref: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-  alerting_rules.yml: {}
-  # groups:
-  #   - name: Instances
-  #     rules:
-  #       - alert: InstanceDown
-  #         expr: up == 0
-  #         for: 5m
-  #         labels:
-  #           severity: page
-  #         annotations:
-  #           description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
-  #           summary: 'Instance {{ $labels.instance }} down'
+  alerting_rules.yml: 
+    groups:
+      - name: Instances
+        rules:
+          - alert: InstanceDown
+            expr: up{instance='ceph',job='ceph_cluster'} > 0
+            for: 1s
+            labels:
+              prom: http
+              severity: page
+            annotations:
+              summary: High prometheus request total is above 1000  
+  #            severity: page
+  #          annotations:
+  #            description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
+  #            summary: 'Instance {{ $labels.instance }} down'
   ## DEPRECATED DEFAULT VALUE, unless explicitly naming your files, please use alerting_rules.yml
   alerts: {}
 

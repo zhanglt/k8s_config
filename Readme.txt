@@ -1,4 +1,4 @@
-kubeadm  init --apiserver-advertise-address=10.0.0.51  --pod-network-cidr=10.244.0.0/16  --kubernetes-version=v1.15.6
+kubeadm  init --apiserver-advertise-address=19.202.136.211 --pod-network-cidr=10.244.0.0/16  --kubernetes-version=v1.15.6
 
 1、kubeadm init --config kubeadm-config.yaml
 2、mkdir -p $HOME/.kube
