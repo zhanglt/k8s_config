@@ -1,0 +1,19 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: prometheus-operator-ceph
+    release: monitor
+  name: prometheus-operator-ceph
+  namespace: kube-monitor
+spec:
+  endpoints:
+  - interval: 30s
+    port: metrcis
+  selector:
+    matchLabels:
+      app: ceph
+    namespaceSelector:
+      matchNames:
+      - kube-monitor

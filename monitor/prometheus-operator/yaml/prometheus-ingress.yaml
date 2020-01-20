@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: prometheus-ingress
+    release: monitor
+  name: prometheus-ingress
+  namespace: kube-monitor
+spec:
+  rules:
+  - host: prometheus.ingress.com
+    http:
+      paths:
+      - backend:
+          serviceName: monitor-prometheus-operato-prometheus
+          servicePort: 9090
+        path: /
+status:
+  loadBalancer: {}

@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: alertmanager-ingress
+    release: monitor
+  name: alertmanager-ingress
+  namespace: kube-monitor
+spec:
+  rules:
+  - host: alertmanager.ingress.com
+    http:
+      paths:
+      - backend:
+          serviceName: monitor-prometheus-operato-alertmanager
+          servicePort: 9093
+        path: /
+status:
+  loadBalancer: {}

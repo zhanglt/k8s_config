@@ -1,4 +1,4 @@
-kubeadm  init --apiserver-advertise-address=19.202.136.211 --pod-network-cidr=10.244.0.0/16  --kubernetes-version=v1.15.6
+kubeadm  init --apiserver-advertise-address=10.0.0.51 --pod-network-cidr=10.244.0.0/16  --kubernetes-version=v1.15.6  
 
 1、kubeadm init --config kubeadm-config.yaml
 2、mkdir -p $HOME/.kube
@@ -16,6 +16,21 @@ kubeadm  init --apiserver-advertise-address=19.202.136.211 --pod-network-cidr=10
 >1.在master上执行命令：kubeadm token create
 >2.获取ca证书`sha256`编码hash值:openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null |   openssl dgst -sha256 -hex | sed 's/^.* //'
 
+delete master taint：
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+修改 网络插件
+calico:
+- name: IP
+  value: "autodetect"
+- name: IP_AUTODETECTION_METHOD
+  value: "interface=enp0s8"
+
+flannl:
+- args:
+  - --ip-masq
+  - --kube-subnet-mgr
+  - --iface=enp0s8
 
 
 

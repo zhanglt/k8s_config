@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  creationTimestamp: "2020-01-20T01:41:24Z"
+  generation: 1
+  labels:
+    app: grafana
+    chart: grafana-4.3.0
+    heritage: Tiller
+    release: monitor
+  name: monitor-grafana
+  namespace: kube-monitor
+  resourceVersion: "60039"
+  selfLink: /apis/extensions/v1beta1/namespaces/kube-monitor/ingresses/monitor-grafana
+  uid: 249a84fb-79db-435a-8f63-e1b23054037a
+spec:
+  rules:
+  - host: grafana.ingress.com
+    http:
+      paths:
+      - backend:
+          serviceName: monitor-grafana
+          servicePort: 80
+        path: /
+status:
+  loadBalancer: {}

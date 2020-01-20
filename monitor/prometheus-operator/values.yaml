@@ -40,6 +40,11 @@ defaultRules:
     prometheusOperator: true
     time: true
 
+  ## Runbook url prefix for default rules
+  runbookUrl: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#
+  ## Reduce app namespace alert scope
+  appNamespacesTarget: ".*"
+
   ## Labels for default rules
   labels: {}
   ## Annotations for default rules
@@ -279,15 +284,15 @@ alertmanager:
     ## Storage is the definition of how storage will be used by the Alertmanager instances.
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
     ##
-    storage: {}
-    # volumeClaimTemplate:
-    #   spec:
-    #     storageClassName: gluster
-    #     accessModes: ["ReadWriteOnce"]
-    #     resources:
-    #       requests:
-    #         storage: 50Gi
-    #   selector: {}
+    storage: 
+      volumeClaimTemplate:
+        spec:
+          storageClassName: fast-rbd
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+        selector: {}
 
 
     ## 	The external URL the Alertmanager instances will be available under. This is necessary to generate correct URLs. This is necessary if Alertmanager is not served from root of a DNS name.	string	false
@@ -390,12 +395,12 @@ grafana:
   ##
   defaultDashboardsEnabled: true
 
-  adminPassword: prom-operator
+  adminPassword: passw0rd
 
   ingress:
     ## If true, Grafana Ingress will be created
     ##
-    enabled: false
+    enabled: true
 
     ## Annotations for Grafana Ingress
     ##
@@ -410,9 +415,9 @@ grafana:
     ## Hostnames.
     ## Must be provided if Ingress is enable.
     ##
-    # hosts:
-    #   - grafana.domain.com
-    hosts: []
+    hosts:
+      - grafana.ingress.com
+    #hosts: []
 
     ## Path for grafana ingress
     path: /
@@ -559,8 +564,11 @@ kubelet:
     #   action: drop
 
     # 	relabel configs to apply to samples before ingestion.
+    #   metrics_path is required to match upstream rules and charts
     ##
-    cAdvisorRelabelings: []
+    cAdvisorRelabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
     # - sourceLabels: [__meta_kubernetes_pod_node_name]
     #   separator: ;
     #   regex: ^(.*)$
@@ -581,8 +589,11 @@ kubelet:
     #   action: drop
 
     # 	relabel configs to apply to samples before ingestion.
+    #   metrics_path is required to match upstream rules and charts
     ##
-    relabelings: []
+    relabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
     # - sourceLabels: [__meta_kubernetes_pod_node_name]
     #   separator: ;
     #   regex: ^(.*)$
@@ -731,9 +742,9 @@ kubeEtcd:
   ## If your etcd is not deployed as a pod, specify IPs it can be found on
   ##
   endpoints: []
-  # - 10.141.4.22
-  # - 10.141.4.23
-  # - 10.141.4.24
+    #- 10.0.0.51
+    #- 10.0.0.52
+    #- 10.0.0.53
 
   ## Etcd service. If using kubeEtcd.endpoints only the port and targetPort are used
   ##
@@ -807,7 +818,7 @@ kubeScheduler:
     ## Scrape interval. If not set, the Prometheus default scrape interval is used.
     ##
     interval: ""
-    ## Enable scraping kube-controller-manager over https.
+    ## Enable scraping kube-scheduler over https.
     ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
     ##
     https: false
@@ -1041,7 +1052,7 @@ prometheusOperator:
     loadBalancerSourceRanges: []
 
   ## Service type
-  ## NodepPort, ClusterIP, loadbalancer
+  ## NodePort, ClusterIP, loadbalancer
   ##
     type: ClusterIP
 
@@ -1332,6 +1343,13 @@ prometheus:
     interval: ""
     selfMonitor: true
 
+    ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+    scheme: ""
+
+    ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+    ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+    tlsConfig: {}
+
     bearerTokenFile:
 
     ## 	metric relabel configs to apply to samples before ingestion.
@@ -1605,15 +1623,15 @@ prometheus:
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
     ##
-    storageSpec: {}
-    #  volumeClaimTemplate:
-    #    spec:
-    #      storageClassName: gluster
-    #      accessModes: ["ReadWriteOnce"]
-    #      resources:
-    #        requests:
-    #          storage: 50Gi
-    #    selector: {}
+    storageSpec: #{}
+      volumeClaimTemplate:
+        spec:
+          storageClassName: fast-rbd
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+        selector: {}
 
     ## AdditionalScrapeConfigs allows specifying additional Prometheus scrape configurations. Scrape configurations
     ## are appended to the configurations generated by the Prometheus Operator. Job configurations must have the form
