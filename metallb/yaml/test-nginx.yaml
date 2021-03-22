@@ -1,8 +1,8 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-metallb
-  namespace: metallb-system
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx
+        image: nginx:1.7.9
         ports:
         - name: http
           containerPort: 80
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-metallb
-  namespace: metallb-system
+  namespace: default
 spec:
   ports:
   - name: http

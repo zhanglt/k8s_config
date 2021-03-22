@@ -2,17 +2,21 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: test-ingress
-  namespace: metallb-system
+  namespace: default
 spec:
   tls:
   - hosts:
     - test.metallb.com
-    secretName: ingress-secret
+    secretName: traefik-token-86km6
   rules:
   - host: test.metallb.com
     http:
       paths:
-      - path: /
+      - path: /1
         backend:
-          serviceName: nginx-metallb
+          serviceName: coffee-v1-svc
           servicePort: 80
+      - path: /2
+        backend:
+          serviceName: coffee-v2-svc
+          servicePort: 80  

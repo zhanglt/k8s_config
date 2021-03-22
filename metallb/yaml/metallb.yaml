@@ -11,7 +11,7 @@ metadata:
   labels:
     app: metallb
   name: speaker
-  namespace: kube-metallb
+  namespace: default
 spec:
   allowPrivilegeEscalation: false
   allowedCapabilities:
@@ -40,7 +40,7 @@ metadata:
   labels:
     app: metallb
   name: controller
-  namespace: kube-metallb
+  namespace: default
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -48,7 +48,7 @@ metadata:
   labels:
     app: metallb
   name: speaker
-  namespace: kube-metallb
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -119,7 +119,7 @@ metadata:
   labels:
     app: metallb
   name: config-watcher
-  namespace: kube-metallb
+  namespace: default
 rules:
 - apiGroups:
   - ''
@@ -143,7 +143,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: controller
-  namespace: kube-metallb
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -158,7 +158,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: speaker
-  namespace: kube-metallb
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -166,7 +166,7 @@ metadata:
   labels:
     app: metallb
   name: config-watcher
-  namespace: kube-metallb
+  namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -184,7 +184,7 @@ metadata:
     app: metallb
     component: speaker
   name: speaker
-  namespace: kube-metallb
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -248,7 +248,7 @@ metadata:
     app: metallb
     component: controller
   name: controller
-  namespace: kube-metallb
+  namespace: default
 spec:
   revisionHistoryLimit: 3
   selector:
