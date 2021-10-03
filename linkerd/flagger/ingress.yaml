@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: podinfo-dashboard-route
+  namespace: test
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: hacker-linner-cert-tls
+  routes:
+    - match: Host(`podinfo.hacker-linner.com`)
+      kind: Rule
+      services:
+        - name: frontend
+          port: 8080
+

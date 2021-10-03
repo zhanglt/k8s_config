@@ -1,0 +1,15 @@
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: flask-split
+spec:
+  service: flaskapp
+  backends:
+  - service: flaskapp-v1
+    weight: 1
+  - service: flaskapp-v2
+    weight: 500m
+
+
+
+

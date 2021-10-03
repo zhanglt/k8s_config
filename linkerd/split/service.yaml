@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-v1
+  labels:
+    app: flaskapp
+spec:
+  selector:
+    app: flaskapp
+    version: v1
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-v2
+  labels:
+    app: flaskapp
+spec:
+  selector:
+    app: flaskapp
+    version: v2
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+

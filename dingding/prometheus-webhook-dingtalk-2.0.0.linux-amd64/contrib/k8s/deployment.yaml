@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-webhook-dingtalk
+spec:
+  replicas: 1
+  template:
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: alertmanager-webhook-dingtalk
+      containers:
+        - name: alertmanager-webhook-dingtalk
+          image: timonwong/prometheus-webhook-dingtalk:v2.0.0
+          args:
+            - --web.listen-address=:8060
+            - --web.enable-ui
+            - --config.file=/config/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - name: http
+              containerPort: 8060
