@@ -1,0 +1,26 @@
+# Source: gitlab/charts/certmanager/templates/rbac.yaml
+# grant cert-manager permission to manage the leaderelection configmap in the
+# leader election namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitlab-certmanager:leaderelection
+  namespace: kube-system
+  labels:
+    app: certmanager
+    app.kubernetes.io/name: certmanager
+    app.kubernetes.io/instance: gitlab
+    app.kubernetes.io/component: "controller"
+    app.kubernetes.io/version: "v1.5.4"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: certmanager-v1.5.4
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gitlab-certmanager:leaderelection
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: gitlab-certmanager
+    namespace: redis
+

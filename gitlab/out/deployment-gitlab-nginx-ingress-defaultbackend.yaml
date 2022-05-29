@@ -1,0 +1,76 @@
+# Source: gitlab/charts/nginx-ingress/templates/default-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-4.0.6
+    release: gitlab
+    heritage: Helm
+    
+    component: "defaultbackend"
+    helm.sh/chart: nginx-ingress-4.0.6
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: default-backend
+  name: gitlab-nginx-ingress-defaultbackend
+  namespace: redis
+spec:
+  selector:
+    matchLabels:
+      app: nginx-ingress
+      release: gitlab
+      component: "defaultbackend"
+  replicas: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: nginx-ingress
+        release: gitlab
+        component: "defaultbackend"
+        
+    spec:
+      containers:
+        - name: nginx-ingress-default-backend
+          image: "registry.gitlab.com/gitlab-org/cloud-native/mirror/images/defaultbackend-amd64:1.5@sha256:4dc5e07c8ca4e23bddb3153737d7b8c556e5fb2f29c4558b7cd6e6df99c512c7"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+              - ALL
+            runAsUser: 65534
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources: 
+            requests:
+              cpu: 5m
+              memory: 5Mi
+      serviceAccountName: gitlab-nginx-ingress-backend
+      terminationGracePeriodSeconds: 60
+

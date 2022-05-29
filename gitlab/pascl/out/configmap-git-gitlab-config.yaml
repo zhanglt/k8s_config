@@ -1,0 +1,20 @@
+# Source: gitlab/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-gitlab-config
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  gitlab.rb: |
+    # external_url 'https://gitlab.example.com'
+    
+    # ensure kubelet probes are whitelisted
+    gitlab_rails['monitoring_whitelist'] = [
+      '127.0.0.1',
+    ]
+

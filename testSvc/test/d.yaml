@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: mydeploy 
+  namespace: test
+  labels:
+    app: mydeploy
+spec:
+  selector: 
+    matchLabels:
+      app: mydeploy
+  replicas: 2
+  template:
+    metadata: 
+      labels:
+        app: mydeploy
+    spec:
+      containers:
+      - name: mypo
+        image: nginx:latest
+        volumeMounts:
+        - name: myvolume
+          mountPath: /mnt
+
+      volumes:
+      - name: myvolume
+        persistentVolumeClaim: 
+          claimName: test-pvc

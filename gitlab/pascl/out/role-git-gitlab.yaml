@@ -1,0 +1,25 @@
+# Source: gitlab/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: ['']
+    verbs: ['list']
+    resources:
+      - pods
+  - apiGroups: ['apps']
+    verbs: ['get']
+    resources:
+      - deployments
+  - apiGroups: ['']
+    verbs: ['create']
+    resources:
+      - pods/exec
+

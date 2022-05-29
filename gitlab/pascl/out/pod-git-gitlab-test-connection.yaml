@@ -1,0 +1,22 @@
+# Source: gitlab/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "git-gitlab-test-connection"
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['git-gitlab:80']
+  restartPolicy: Never
+MANIFEST:
+

@@ -1,0 +1,38 @@
+# Source: gitlab/charts/registry/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gitlab-registry
+  namespace: redis
+  labels:
+    app: registry
+    chart: registry-0.7.0
+    release: gitlab
+    heritage: Helm
+    
+  annotations:
+    
+    kubernetes.io/ingress.provider: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    
+spec:
+  ingressClassName: gitlab-nginx
+  rules:
+    - host: registry.gitlab.code.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gitlab-registry
+                port:
+                  number:  5000
+  tls:
+    - hosts:
+      - registry.gitlab.code.local
+      secretName: gitlab-wildcard-tls
+

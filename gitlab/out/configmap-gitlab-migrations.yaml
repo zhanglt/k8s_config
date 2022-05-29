@@ -1,0 +1,90 @@
+# Source: gitlab/charts/gitlab/charts/migrations/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-migrations
+  namespace: redis
+  labels:
+    app: migrations
+    chart: migrations-5.9.2
+    release: gitlab
+    heritage: Helm
+    
+data:
+  pages_redirect_uri: http://projects.pages.gitlab.code.local/auth
+  installation_type: |
+    gitlab-helm-chart
+  database.yml.erb: |
+    
+    production:
+      main:
+        adapter: postgresql
+        encoding: unicode
+        database: gitlabhq_production
+        username: postgres
+        password: <%= File.read('/etc/gitlab/postgres/psql-password-main').strip.to_json %>
+        host: "10.0.0.117"
+        port: 5432
+        connect_timeout: 
+        keepalives: 
+        keepalives_idle: 
+        keepalives_interval: 
+        keepalives_count: 
+        tcp_user_timeout: 
+        application_name: 
+        prepared_statements: false
+        
+        
+  resque.yml.erb: |
+    production:
+      url: redis://:<%= ERB::Util::url_encode(File.read("/etc/gitlab/redis/redis-password").strip) %>@10.104.236.143:6379
+      
+      id:
+  
+  
+  
+  cable.yml.erb: |
+    production:
+      url: redis://:<%= ERB::Util::url_encode(File.read("/etc/gitlab/redis/redis-password").strip) %>@10.104.236.143:6379
+      
+      id:
+      adapter: redis
+  
+  
+  
+  gitlab.yml.erb: |
+    production: &base
+      gitlab:
+        host: gitlab.gitlab.code.local
+      gitaly:
+        client_path: /home/git/gitaly/bin
+        token: <%= File.read('/etc/gitlab/gitaly/gitaly_token').strip.to_json %>
+      repositories:
+        storages: # You must have at least a `default` storage path.
+          default:
+            path: /var/opt/gitlab/repo
+            gitaly_address: tcp://gitlab-gitaly-0.gitlab-gitaly.redis.svc:8075
+          
+      
+      sidekiq:
+      
+  configure: |
+    set -e
+    config_dir="/init-config"
+    secret_dir="/init-secrets"
+    
+    for secret in rails-secrets migrations gitaly ; do
+      mkdir -p "${secret_dir}/${secret}"
+      cp -v -r -L "${config_dir}/${secret}/." "${secret_dir}/${secret}/"
+    done
+    for secret in redis minio objectstorage postgres ldap omniauth smtp kas pages oauth-secrets mailroom ; do
+      if [ -e "${config_dir}/${secret}" ]; then
+        mkdir -p "${secret_dir}/${secret}"
+        cp -v -r -L "${config_dir}/${secret}/." "${secret_dir}/${secret}/"
+      fi
+    done
+    
+    
+    
+# Leave this here - This line denotes end of block to the parser.
+

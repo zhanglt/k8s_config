@@ -1,0 +1,222 @@
+---
+# Source: gitlab/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "git-gitlab-test-connection"
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['git-gitlab:80']
+  restartPolicy: Never
+MANIFEST:
+---
+# Source: gitlab/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-gitlab-config
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  gitlab.rb: |
+    # external_url 'https://gitlab.example.com'
+    
+    # ensure kubelet probes are whitelisted
+    gitlab_rails['monitoring_whitelist'] = [
+      '127.0.0.1',
+    ]
+---
+# Source: gitlab/templates/persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-gitlab-secrets
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Mi
+  volumeMode: Filesystem
+  storageClassName: local-path
+---
+# Source: gitlab/templates/persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-gitlab-storage
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+  volumeMode: Filesystem
+  storageClassName: local-path
+---
+# Source: gitlab/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: ['']
+    verbs: ['list']
+    resources:
+      - pods
+  - apiGroups: ['apps']
+    verbs: ['get']
+    resources:
+      - deployments
+  - apiGroups: ['']
+    verbs: ['create']
+    resources:
+      - pods/exec
+---
+# Source: gitlab/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: git-gitlab
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: longhorn-system
+---
+# Source: gitlab/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: "http"
+      port: 80
+      targetPort: "http"
+      protocol: "TCP"
+  selector:
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+---
+# Source: gitlab/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gitlab
+      app.kubernetes.io/instance: git
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gitlab
+        app.kubernetes.io/instance: git
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: gitlab
+          image: "gitlab/gitlab-ce:14.9.1-ce.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: "http"
+              containerPort: 80
+              protocol: "TCP"
+          env:
+            - name: GITLAB_OMNIBUS_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: git-gitlab-config
+                  key: gitlab.rb
+            - name: "TZ"
+              value: "UTC"
+          volumeMounts:
+            - name: secrets-volume
+              mountPath: /etc/gitlab
+            - name: storage-volume
+              mountPath: /var/opt/gitlab
+          startupProbe:
+            httpGet:
+              path: /-/health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /-/readiness
+              port: http
+          resources: {}
+      volumes:
+        - name: secrets-volume
+          persistentVolumeClaim:
+            claimName: git-gitlab-secrets
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: git-gitlab-storage

@@ -1,0 +1,16 @@
+apiVersion: v2
+appVersion: 14.9.2-ce.0
+description: A Helm chart for GitLab Omnibus
+home: https://github.com/pascaliske/helm-charts/tree/master/charts/gitlab
+keywords:
+- gitlab
+maintainers:
+- email: info@pascaliske.dev
+  name: pascaliske
+  url: https://pascaliske.dev
+name: gitlab
+sources:
+- https://github.com/pascaliske/helm-charts
+- https://docs.gitlab.com
+type: application
+version: 0.2.5

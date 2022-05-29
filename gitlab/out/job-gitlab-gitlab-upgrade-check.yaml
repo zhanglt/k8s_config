@@ -1,0 +1,57 @@
+# Source: gitlab/templates/upgrade_check_hook.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gitlab-gitlab-upgrade-check
+  namespace: redis
+  labels:
+    app: gitlab
+    chart: gitlab-5.9.2
+    release: gitlab
+    heritage: Helm
+    
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: gitlab
+        release: gitlab
+    spec:
+      
+      securityContext:
+        runAsUser: 65534
+        fsGroup: 65534
+      restartPolicy: Never
+      
+      containers:
+        - name: run-check
+          image: "registry.gitlab.com/gitlab-org/cloud-native/mirror/images/busybox:latest"
+          command: ['/bin/sh', '/scripts/runcheck']          
+          env:
+            - name: GITLAB_VERSION
+              value: '14.9.2'
+            - name: CHART_VERSION
+              value: '5.9.2'
+          volumeMounts:
+            - name: chart-info
+              mountPath: /chart-info
+            - name: scripts
+              mountPath: /scripts
+          resources:
+            requests:
+              cpu: 50m
+      volumes:
+      - name: chart-info
+        configMap:
+          name: gitlab-gitlab-chart-info
+          optional: true
+      - name: scripts
+        configMap:
+          name: gitlab-gitlab-upgrade-check
+MANIFEST:
+

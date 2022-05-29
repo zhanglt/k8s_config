@@ -1,0 +1,73 @@
+# Source: gitlab/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gitlab
+      app.kubernetes.io/instance: git
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gitlab
+        app.kubernetes.io/instance: git
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: gitlab
+          image: "gitlab/gitlab-ce:14.9.1-ce.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: "http"
+              containerPort: 80
+              protocol: "TCP"
+          env:
+            - name: GITLAB_OMNIBUS_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: git-gitlab-config
+                  key: gitlab.rb
+            - name: "TZ"
+              value: "UTC"
+          volumeMounts:
+            - name: secrets-volume
+              mountPath: /etc/gitlab
+            - name: storage-volume
+              mountPath: /var/opt/gitlab
+          startupProbe:
+            httpGet:
+              path: /-/health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /-/readiness
+              port: http
+          resources: {}
+      volumes:
+        - name: secrets-volume
+          persistentVolumeClaim:
+            claimName: git-gitlab-secrets
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: git-gitlab-storage
+

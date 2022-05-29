@@ -1,0 +1,15 @@
+# Source: gitlab/charts/gitlab/charts/gitlab-shell/templates/nginx-tcp-configmap.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-nginx-ingress-tcp
+  namespace: redis
+  labels:
+    app: gitlab-shell
+    chart: gitlab-shell-5.9.2
+    release: gitlab
+    heritage: Helm
+    
+data:
+  "22": "redis/gitlab-gitlab-shell:22"
+

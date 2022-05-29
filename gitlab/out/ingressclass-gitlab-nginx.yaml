@@ -1,0 +1,21 @@
+# Source: gitlab/charts/nginx-ingress/templates/controller-ingressclass.yaml
+# We don't support namespaced ingressClass yet
+# So a ClusterRole and a ClusterRoleBinding is required
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-4.0.6
+    release: gitlab
+    heritage: Helm
+    
+    component: "controller"
+    helm.sh/chart: nginx-ingress-4.0.6
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: controller
+  name: gitlab-nginx
+spec:
+  controller: k8s.io/ingress-nginx
+

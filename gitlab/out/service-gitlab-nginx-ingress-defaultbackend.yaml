@@ -1,0 +1,29 @@
+# Source: gitlab/charts/nginx-ingress/templates/default-backend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-4.0.6
+    release: gitlab
+    heritage: Helm
+    
+    component: "defaultbackend"
+    helm.sh/chart: nginx-ingress-4.0.6
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: default-backend
+  name: gitlab-nginx-ingress-defaultbackend
+  namespace: redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: nginx-ingress
+    release: gitlab
+    component: "defaultbackend"
+

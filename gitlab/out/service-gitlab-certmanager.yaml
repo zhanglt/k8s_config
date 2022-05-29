@@ -1,0 +1,26 @@
+# Source: gitlab/charts/certmanager/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-certmanager
+  namespace: "redis"
+  labels:
+    app: certmanager
+    app.kubernetes.io/name: certmanager
+    app.kubernetes.io/instance: gitlab
+    app.kubernetes.io/component: "controller"
+    app.kubernetes.io/version: "v1.5.4"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: certmanager-v1.5.4
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 9402
+      name: tcp-prometheus-servicemonitor
+      targetPort: 9402
+  selector:
+    app.kubernetes.io/name: certmanager
+    app.kubernetes.io/instance: gitlab
+    app.kubernetes.io/component: "controller"
+

@@ -1,0 +1,22 @@
+# Source: gitlab/charts/certmanager/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-certmanager-controller-approve:cert-manager-io
+  labels:
+    app: certmanager
+    app.kubernetes.io/name: certmanager
+    app.kubernetes.io/instance: gitlab
+    app.kubernetes.io/component: "cert-manager"
+    app.kubernetes.io/version: "v1.5.4"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: certmanager-v1.5.4
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gitlab-certmanager-controller-approve:cert-manager-io
+subjects:
+  - name: gitlab-certmanager
+    namespace: "redis"
+    kind: ServiceAccount
+

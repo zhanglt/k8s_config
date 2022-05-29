@@ -1,0 +1,39 @@
+# Source: gitlab/charts/nginx-ingress/templates/controller-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-4.0.6
+    release: gitlab
+    heritage: Helm
+    
+    component: "controller"
+    helm.sh/chart: nginx-ingress-4.0.6
+    app.kubernetes.io/version: "1.0.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: controller
+  name: gitlab-nginx-ingress-controller
+  namespace: redis
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https
+    - name: gitlab-shell
+      port: 22
+      protocol: TCP
+      targetPort: gitlab-shell
+  selector:
+    app: nginx-ingress
+    release: gitlab
+    component: "controller"
+

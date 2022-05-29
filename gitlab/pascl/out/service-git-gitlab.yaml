@@ -1,0 +1,22 @@
+# Source: gitlab/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-gitlab
+  labels:
+    helm.sh/chart: gitlab-0.2.5
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+    app.kubernetes.io/version: "14.9.2-ce.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: "http"
+      port: 80
+      targetPort: "http"
+      protocol: "TCP"
+  selector:
+    app.kubernetes.io/name: gitlab
+    app.kubernetes.io/instance: git
+
